@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>Introduction to FS2</title>
+        <link rel="stylesheet" href="./css/reveal.css">
+        <link rel="stylesheet" href="./css/theme/beige.css" id="theme">
+        <link rel="stylesheet" href="./css/highlight/atom-one-light.css">
+        <link rel="stylesheet" href="./css/print/paper.css" type="text/css" media="print">
+
+
+    </head>
+    <body>
+
+        <div class="reveal">
+            <div class="slides"><section  data-markdown><script type="text/template">
+
+
+### fs2 - Functional Streams for Scala
+
+
+##### History
+
+https://fs2.io/
+ - v1.0.0  Oct  5, 2018
+
+ ****Was scalaz-stream***
+ - v0.8.5 Oct 23, 2016 
+ - v0.1   Oct 10, 2013 
+</script></section><section  data-markdown><script type="text/template">
+### About me
+
+![](github.png)
+
+<aside class="notes"><ul>
+<li>Senior developer for Citi</li>
+<li>Facinated by FP</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template">
+## Dependencies
+  - <!-- .element: class="fragment" data-fragment-index="1"--> Cats Effect 
+> <!-- .element: class="fragment" data-fragment-index="1" -->The IO Monad for Scala
+  - <!-- .element: class="fragment" data-fragment-index="2" --> Cats
+> <!-- .element: class="fragment" data-fragment-index="2" -->Lightweight, modular, and extensible library for functional programming
+</script></section><section  data-markdown><script type="text/template">
+### REPL setup
+Download [ammonite](http://ammonite.io/#Ammonite-REPL)
+```sh
+>java -jar ~/tools/ammonite/amm-2.12-1.6.2.jar
+
+Welcome to the Ammonite Repl 1.6.2
+(Scala 2.12.8 Java 1.8.0_181)
+
+@ interp.load.ivy("co.fs2" %% "fs2-core" % "1.0.2")
+```</script></section><section ><section data-markdown><script type="text/template">
+## Pure
+
+**Referential transparency**:
+> Where one can replace an expression for its value, without changing the result
+
+<aside class="notes"></aside></script></section><section data-markdown><script type="text/template">
+## Side Effects
+
+```scala
+val expr = 123
+// expr: Int = 123
+
+(expr, expr)
+// res1: (Int, Int) = (123, 123)
+
+val expr = println("Hey!")
+// Hey!
+
+(expr, expr)
+// res3: (Unit, Unit) = ((), ())
+```
+<!-- .element: class="fragment" --> **Not pure**</script></section><section data-markdown><script type="text/template">
+## Managing effects
+#### using IO
+
+```scala 
+import cats.effect.IO
+
+IO(println("Hey!"))
+// res13: IO[Unit] = Delay(...)
+res13.unsafeRunSync
+// Hey!
+
+``` 
+
+<!-- .element: class="fragment" --> **Pure**
+</script></section><section data-markdown><script type="text/template">
+## Managing effects
+#### IO encapsulates the effects to maintain RT
+
+```scala
+def putStrLn(line: String): IO[Unit] =  IO {println(line)}
+def f(a: IO[Unit], b: IO[Unit]): Unit = { 
+  a.unsafeRunSync; b.unsafeRunSync
+}
+
+f(putStrLn("hi!"), putStrLn("hi!"))
+// hi!
+// hi!
+
+val x = putStrLn("hi!")
+f(x, x)
+// hi!
+// hi!
+```
+<!-- .element: class="fragment" -->
+
+</script></section><section data-markdown><script type="text/template">
+## Side effects in concurrency
+
+```scala
+import scala.io.StdIn
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import cats.syntax.apply._   // for mapN
+import cats.instances.all._  // implicits
+
+val read : Future[Int] = Future(StdIn.readInt)
+// does not work as Future is eager
+val result : Future[Int] = (read, read).mapN(_ + _)
+```
+
+<!-- .element: class="fragment" --> **Not pure**
+</script></section><section data-markdown><script type="text/template">
+## Stream
+##### (scala.collection)
+```scala
+Stream(1, 2, 3)
+// res1: Stream[Int] = Stream(1, 2, 3)
+
+Stream(1, 2, 3).map(_ + 1)
+// res2: Stream[Int] = Stream(2, 3, 4)
+
+Stream(1, 2, 3).map(_ + 1).map(_.toString)
+// res3: Stream[String] = Stream("2", "3", "4")
+```
+<aside class="notes"><ul>
+<li>Refresher collection Stream before IO Streams</li>
+</ul>
+</aside></script></section><section data-markdown><script type="text/template">## FS2 Stream
+```scala
+import fs2._
+
+Stream(1, 2, 3)
+// res2: Stream[Nothing, Int] = Stream(..)
+
+Stream(1, 2, 3).map(_ + 1)
+// res3: Stream[Nothing, Int] = Stream(..)
+
+Stream(1, 2, 3).map(_ + 1).map(_.toString)
+// res4: Stream[Nothing, String] = Stream(..)
+
+Stream(1, 2, 3).flatMap { n => Stream.emit(List.fill(n)(n))}
+// res5: Stream[Nothing, List[Int]] = Stream(..)
+```</script></section></section><section  data-markdown><script type="text/template">## Pure Stream
+***Still no IO***
+```scala
+val s = Stream(1, 2, 3)
+// s: Stream[Nothing, Int] = Stream(..)
+
+val t = Stream(4, 5, 6)
+// t: Stream[Nothing, Int] = Stream(..)
+
+val u = s interleave t
+// u: Stream[Nothing, Int] = Stream(..)
+
+u.toList
+// res9: List[Int] = List(1, 4, 2, 5, 3, 6)
+
+val s2 = Stream.range(0, 10)
+// s2: Stream[Nothing, Int] = Stream(..)
+
+val t2 = s2.intersperse(-42)
+// t2: Stream[Nothing, Int] = Stream(..)
+
+t2.toList
+// res12: List[Int] = List(0, -42, 1, -42, 2, -42, 3, -42, 4, -42, 5, -42, 6, -42, 7, -42, 8, -42, 9)
+
+val s3 = Stream.range(0, 10)
+// s3: Stream[Nothing, Int] = Stream(..)
+
+val t3 = Stream(1, 2, 3)
+// t3: Stream[Nothing, Int] = Stream(..)
+
+s3.zip(t3).toList
+// res15: List[(Int, Int)] = List((0, 1), (1, 2), (2, 3))
+```</script></section><section  data-markdown><script type="text/template">## IO Monad 
+
+```scala
+
+ // trait Monad[F[_]] extends Functor[F] {
+  def pure[A](a: => A): F[A] = ???
+  def flatMap[A,B](ma: F[A])(f: A => F[B]): F[B] = ???
+
+import cats.effect.IO
+
+val t = IO.pure(42)
+// t: IO[Int] = Pure(42)
+
+t.map {i => i + 1}
+// res4: IO[Int] = Map(Pure(42), ...)
+
+res4.unsafeRunSync
+// res5: Int = 43
+
+
+```
+<aside class="notes"><ul>
+<li>pure and flatmap are the primitive combinators.</li>
+<li>map is a derived combinator.</li>
+<li>IO Monad have other methods to support concurrency, cancel, etc.</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template">## IO Monad - concurrency 
+
+```scala
+import cats.effect.ContextShift
+implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
+
+val t = IO { println(s"Computing on ${Thread.currentThread.getName}..."); System.currentTimeMillis}
+t.unsafeRunSync
+// Computing on main...
+// res12: Long = 1548213244359L
+
+val t = IO.delay { println(s"Computing on ${Thread.currentThread.getName}..."); System.currentTimeMillis}
+t.unsafeRunSync
+// Computing on main...
+// res14: Long = 1548213268629L
+
+t.start.unsafeRunSync
+//Computing on scala-execution-context-global-55...
+//res15: cats.effect.Fiber[IO, Long] = Tuple(
+//  Bind(Pure(Right(1548213499660L)), cats.MonadError$$Lambda$1813/32485743@1a10bf),
+//  Suspend(cats.effect.internals.IOConnection$Impl$$Lambda$1808/14557395@1ffa400))
+```
+
+<aside class="notes"><ul>
+<li>ContextShift implicit is essntial for concurrency</li>
+<li>Displaying the thread name to validate</li>
+<li>one example &#39;start&#39; is shown here.</li>
+</ul>
+</aside></script></section><section  data-markdown><script type="text/template"># Questions?
+
+- ??? 
+
+</script></section></div>
+        </div>
+
+        <script src="./lib/js/head.min.js"></script>
+        <script src="./js/reveal.js"></script>
+
+        <script>
+            function extend() {
+              var target = {};
+              for (var i = 0; i < arguments.length; i++) {
+                var source = arguments[i];
+                for (var key in source) {
+                  if (source.hasOwnProperty(key)) {
+                    target[key] = source[key];
+                  }
+                }
+              }
+              return target;
+            }
+
+            // Optional libraries used to extend on reveal.js
+            var deps = [
+              { src: './lib/js/classList.js', condition: function() { return !document.body.classList; } },
+              { src: './plugin/markdown/marked.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+              { src: './plugin/markdown/markdown.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
+              { src: './plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+              { src: './plugin/zoom-js/zoom.js', async: true },
+              { src: './plugin/notes/notes.js', async: true },
+              { src: './plugin/math/math.js', async: true }
+            ];
+
+            // default options to init reveal.js
+            var defaultOptions = {
+              controls: true,
+              progress: true,
+              history: true,
+              center: true,
+              transition: 'default', // none/fade/slide/convex/concave/zoom
+              dependencies: deps
+            };
+
+            // options from URL query string
+            var queryOptions = Reveal.getQueryHash() || {};
+
+            var options = {"transition":"slide"};
+            options = extend(defaultOptions, options, queryOptions);
+        </script>
+
+
+        <script>
+          Reveal.initialize(options);
+        </script>
+    </body>
+</html>
