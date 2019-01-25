@@ -1,4 +1,4 @@
----
+﻿---
 title: Introduction to FS2
 author: Padhu Ramalingam
 theme: beige
@@ -23,7 +23,17 @@ https://fs2.io/
 ---
 
 ### Bio
+```
+துன்பம் உறவரினும் செய்க துணிவாற்றி
+இன்பம் பயக்கும் வினை.
+```
+___
+```txt
+Though it should cause increasing sorrow (at the outset), do with
+firmness the act that yield bliss (in the end).
 
+Thirukkural #669 Chapter 67.
+```
 
 Note:
 - Senior developer for Citi
@@ -31,13 +41,13 @@ Note:
 
 ---
 
-## Dependencies
+### Dependencies
   - <!-- .element: class="fragment" data-fragment-index="1"--> Cats Effect 
 > <!-- .element: class="fragment" data-fragment-index="1" -->The IO Monad for Scala
   - <!-- .element: class="fragment" data-fragment-index="2" --> Cats
 > <!-- .element: class="fragment" data-fragment-index="2" -->Lightweight, modular, and extensible library for functional programming
 
----
+----
 
 ### REPL setup
 [ammonite](http://ammonite.io/#Ammonite-REPL)
@@ -55,7 +65,7 @@ If you like Ammonite, please support our development at www.patreon.com/lihaoyi
 ```
 ---
 
-## Pure
+### Pure
 
 **Referential transparency**:
 > Where one can replace an expression for its value, without changing the result
@@ -64,7 +74,7 @@ Note:
 
 ----
 
-## Side Effects
+### Side Effects
 
 ```scala
 val expr = 123
@@ -82,7 +92,7 @@ val expr = println("Hey!")
 <!-- .element: class="fragment" --> **Not pure**
 ----
 
-## Side effects in concurrency
+### Side effects in concurrency
 
 ```scala
 import scala.io.StdIn
@@ -100,7 +110,7 @@ val result : Future[Int] = (read, read).mapN(_ + _)
 
 ---
 
-## cats-effect 
+## Cats Effect 
 
 **`IO[A]`** <!-- .element: class="fragment" -->
 
@@ -111,8 +121,8 @@ val result : Future[Int] = (read, read).mapN(_ + _)
 
 ----
 
-## Managing effects
-#### using IO
+### Managing effects
+using IO
 
 ```scala 
 import cats.effect.IO
@@ -129,13 +139,15 @@ n.unsafeRunSync
 // res4: Int = 10
 
 ``` 
+Notes:
+- The operations are suspended and run on demand only 
 
 <!-- .element: class="fragment" --> **Pure**
 
 ----
 
-## Managing effects
-#### IO encapsulates the effects to maintain RT
+### Managing effects
+IO encapsulates the _description_ of effects to maintain RT
 
 ```scala
 def putStrLn(line: String): IO[Unit] =  IO {println(line)}
@@ -152,11 +164,11 @@ f(x, x)
 // hi!
 // hi!
 ```
-<!-- .element: class="fragment" -->
-
+Notes:
+- side effects issue is resolved.
 
 ---
-## IO Monad 
+### IO Monad 
 
 ```scala
 
@@ -183,8 +195,9 @@ Note:
 - IO Monad have other methods to support concurrency, cancel, etc.
 - we'll see concurrency next.
 
----
+----
 ### for comprehension
+sidebar
 ```scala
 List(1, 2, 3).flatMap(n => List("a", "b").map(c => (n, c)))
 // res10: List[(Int, String)] = List((1, "a"), (1, "b"), (2, "a"), (2, "b"), (3, "a"), (3, "b"))
@@ -198,8 +211,8 @@ for {
 Notes:
   - for comprehension is syntactic sugar to manage flatMap and maps
 
----
-## IO Application
+----
+### IO Application
 Pure hello world
 ```scala
 
@@ -214,8 +227,9 @@ Pure hello world
 
   hello.unsafeRunSync()
 ```
----
-## IO Monad - concurrency 
+----
+### IO Monad - concurrency 
+main thread
 
 ```scala
 import cats.effect.IO
@@ -232,6 +246,17 @@ t.unsafeRunSync
 // Computing on main...
 // res14: Long = 1548213268629L
 
+
+```
+
+Notes: 
+- ContextShift implicit is essntial for concurrency
+- Displaying the thread name to validate
+----
+### IO Monad - concurrency 
+forked thread
+
+```scala
 t.start
 //res7: IO[cats.effect.Fiber[IO, Long]] = Async(...
 
@@ -248,10 +273,10 @@ fiber.join.unsafeRunSync
 Notes: 
 - ContextShift implicit is essntial for concurrency
 - Displaying the thread name to validate
-----
+---
 
-## Stream
-##### (scala.collection)
+### Stream
+(scala.collection)
 ```scala
 Stream(1, 2, 3)
 // res1: Stream[Int] = Stream(1, 2, 3)
@@ -279,7 +304,8 @@ Note:
 - also pure, compositional, possesses algebras
 
 ----
-## FS2 Stream
+### FS2 Stream
+-without effects
 ```scala
 import fs2._
 
@@ -295,9 +321,9 @@ Stream(1, 2, 3).map(_ + 1).map(_.toString)
 Stream(1, 2, 3).flatMap { n => Stream.emit(List.fill(n)(n))}
 // res5: Stream[Nothing, List[Int]] = Stream(..)
 ```
----
-## Pure Stream
-Extracting pure values
+----
+### Pure Stream
+combinators - interleave and interperse.
 ```scala
 val s = Stream(1, 2, 3)
 // s: Stream[Nothing, Int] = Stream(..)
@@ -314,7 +340,12 @@ val t = s.intersperse(-42)
 // t: Stream[Nothing, Int] = Stream(..)
 t.toList
 // res12: List[Int] = List(0, -42, 1, -42, 2, -42, 3, -42, 4, -42, 5, -42, 6, -42, 7, -42, 8, -42, 9)
+```
 
+----
+### Pure Stream
+combinators - zip.
+```scala
 val s = Stream.range(0, 10)
 // s: Stream[Nothing, Int] = Stream(..)
 val t = Stream(1, 2, 3)
@@ -322,9 +353,8 @@ val t = Stream(1, 2, 3)
 s.zip(t3).toList
 // res15: List[(Int, Int)] = List((0, 1), (1, 2), (2, 3))
 ```
-
 ---
-## IO Stream
+### IO Stream
 ```scala
 interp.load.ivy("co.fs2" %% "fs2-core" % "1.0.2")
 interp.load.ivy("co.fs2" %% "fs2-io" % "1.0.2")
@@ -338,35 +368,35 @@ implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent
 
 val currentTime: IO[Long] = IO.delay {System.currentTimeMillis}
 // currentTime: IO[Long] = Delay(...)
-
 Stream.eval(currentTime)
 // res7: Stream[IO, Long] = Stream(..)
 
-Stream.eval(currentTime).repeat.take(5).compile.toVector
-// res8: IO[Vector[Long]] = Map( ...
-
-res8.unsafeRunSync
-// res9: Vector[Long] = Vector(1548292261803L, 1548292261848L, 1548292261848L, 1548292261848L, 1548292261848L)
 ```
 Notes:
-Stream.eval(currentTime).repeat.take(5).compile.toVector
-is simplified to
-Stream.repeatEval(currentTime).take(5).compile.toVector
-
----
-## IO Stream
-Combining streams
+- notice the type of the stream created.
+----
+### IO Stream
+Infinite IO Stream
 ```scala
+Stream.eval(currentTime).repeat.take(5).compile.toVector
+// res8: IO[Vector[Long]] = Map( ...
+res8.unsafeRunSync
+// res9: Vector[Long] = Vector(1548292261803L, 1548292261848L, 1548292261848L, 1548292261848L, 1548292261848L)
+
 Stream.repeatEval(currentTime).take(5).compile.toVector
 // res10: IO[Vector[Long]] = Map(...
+```
+Notes:
+- repeatEval is short
 
+----
+### IO Stream
+Combining with no effects Streams
+```scala
 val s = Stream.range(0,8)
 // s: Stream[Nothing, Int] = Stream(..)
-
-
 s.zip(Stream.repeatEval(currentTime))
 // res11: Stream[IO, (Int, Long)] = Stream(..)
-
 @ res11.compile.toVector.unsafeRunSync
 res12: Vector[(Int, Long)] = Vector(
   (0, 1548293081488L),
@@ -379,9 +409,13 @@ res12: Vector[(Int, Long)] = Vector(
   (7, 1548293081491L)
 )
 ```
+Notes:
+- Same as pure and collections.
+- terminates when one of the stream in combination ends.
+
 ---
-## IO Stream
-File IO
+### File IO
+Imports
 ```scala
 interp.load.ivy("co.fs2" %% "fs2-core" % "1.0.2")
 interp.load.ivy("co.fs2" %% "fs2-io" % "1.0.2")
@@ -393,14 +427,15 @@ import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
 implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
-// cs: ContextShift[IO] = cats.effect.internals.IOContextShift@14e34e4
-
 implicit val timer: Timer[IO] = IO.timer(scala.concurrent.ExecutionContext.Implicits.global)
-// timer: Timer[IO] = cats.effect.internals.IOTimer@a75b05
 
 val blockingExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
-// blockingExecutionContext: scala.concurrent.ExecutionContextExecutorService = scala.concurrent.impl.ExecutionContextImpl$$anon$4@4a2090
+```
+----
+### File IO
+Raw bytes
 
+```scala
 val src = io.file.readAll[IO](java.nio.file.Paths.get("fahrenheit.txt"), blockingExecutionContext, 16)
 // src: Stream[IO, Byte] = Stream(..)
 
@@ -412,9 +447,9 @@ src.compile.toVector.unsafeRunSync
 //  116,
 ...
 ```
----
-## IO Stream
-transformers
+----
+### File IO
+string decoder
 ```scala
 text.utf8Decode
 // res8: Stream[Nothing, Byte] => Stream[Nothing, String] = fs2.text$$$Lambda$1929/18862762@a84ea8
@@ -433,9 +468,9 @@ res9.compile.toVector.unsafeRunSync
 // 17.9
 // 25""",
 ```
----
-## IO Stream
-Stream processing
+----
+### Control flow
+'through'
 ```scala
 def fahrenheitToCelsius(f: Double): Double = (f - 32.0) * (5.0/9.0)
 // defined function fahrenheitToCelsius
@@ -451,39 +486,395 @@ res12.compile.toVector.unsafeRunSync
 Notes:
 - note the execption
 
----
-## IO Stream
-Stream process flow
+----
+### Control flow
+filters
 ```scala
 val decoded: Stream[IO, String] = src.through(text.utf8Decode)
-// decoded: Stream[IO, String] = Stream(..)
-
 val lines: Stream[IO, String] = decoded.through(text.lines)
-// lines: Stream[IO, String] = Stream(..)
-
 val filtered: Stream[IO, String] = lines.filter(s => !s.trim.isEmpty && !s.startsWith("//"))
-// filtered: Stream[IO, String] = Stream(..)
-
 val mapped: Stream[IO, String] = filtered.map(line => fahrenheitToCelsius(line.toDouble).toString)
-// mapped: Stream[IO, String] = Stream(..)
-
 val withNewlines: Stream[IO, String] = mapped.intersperse("\n")
-// withNewlines: Stream[IO, String] = Stream(..)
-
 val encodedBytes: Stream[IO, Byte] = withNewlines.through(text.utf8Encode)
-// encodedBytes: Stream[IO, Byte] = Stream(..)
-
 val written: Stream[IO, Unit] = encodedBytes.through(io.file.writeAll(Paths.get("celsius2.txt"), blockingExecutionContext))
-// written: Stream[IO, Unit] = Stream(..)
-
 val task: IO[Unit] = written.compile.drain
-// task: IO[Unit] = Map(
 
 task.unsafeRunSync()
 blockingExecutionContext.shutdown()
 ```
 ---
-# Questions?
+### Undeterministic streams
+Setup
+```scala
+interp.load.ivy("co.fs2" %% "fs2-core" % "1.0.2")
+interp.load.ivy("co.fs2" %% "fs2-io" % "1.0.2")
+
+import cats.effect._
+import fs2._
+import fs2.concurrent._
+import java.util.concurrent.Executors
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
+import cats.effect.ContextShift
+
+implicit val timer: Timer[IO] = IO.timer(scala.concurrent.ExecutionContext.Implicits.global)
+implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
+
+
+val ticks = Stream.awakeEvery[IO](1.second).evalMap { i => IO.delay(println("Time: " + i)) }
+// ticks: Stream[IO[x], Unit] = Stream(..)
+
+ticks.take(10).compile.drain.unsafeRunSync
+// Time: 1122896920 nanoseconds
+// Time: 2123038855 nanoseconds
+// Time: 3125578098 nanoseconds
+...
+
+```
+----
+### Undeterministic streams
+Add log
+```scala
+(Stream(1, 2, 3) ++ Stream(4, 5, 6))
+// res9: Stream[Nothing, Int] = Stream(..)
+res9.toVector
+//res10: Vector[Int] = Vector(1, 2, 3, 4, 5, 6)
+
+def log[A](prefix: String): Pipe[IO, A, A] = _.evalMap { a =>
+    IO.delay { println(s"$prefix> $a"); a }
+  }
+
+Stream(1, 2, 3).through(log("A"))
+// res12: Stream[IO, Int] = Stream(..)
+
+res12.compile.drain.unsafeRunSync
+// A> 1
+// A> 2
+// A> 3
+
+```
+Notes:
+- how to monitor individual streams?
+- add log.
+
+----
+### Undeterministic streams
+add random delay for demo
+```scala
+def randomDelays[A](max: FiniteDuration): Pipe[IO,A,A] = _.evalMap { a =>
+    val delay = IO.delay(scala.util.Random.nextInt(max.toMillis.toInt))
+    delay.flatMap { d => Timer[IO].sleep(d.millis); IO{a}}
+  }
+
+Stream.range(1, 20).through(randomDelays(1.second))
+  .through(log("Delayed")).compile.toVector.unsafeRunSync
+// Delayed> 1
+// Delayed> 2
+// Delayed> 3
+// Delayed> 4
+// ...
+
+// res17: Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+
+Stream.range(1, 20).through(log("before-delay"))
+  .through(randomDelays(1.second)).through(log("Delayed"))
+  .compile.toVector.unsafeRunSync
+// before-delay> 1
+// Delayed> 1
+// before-delay> 2
+// Delayed> 2
+// before-delay> 3
+// Delayed> 3
+// ...
+
+// res18: Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
+
+```
+---
+### Combining streams
+interleved
+```scala
+
+val a = Stream.range(1, 10).through(randomDelays(1.second)).through(log("A"))
+val b = Stream.range(1, 10).through(randomDelays(1.second)).through(log("B"))
+val c = Stream.range(1, 10).through(randomDelays(1.second)).through(log("C"))
+
+
+(a interleave b).through(log("interleaved")).compile.toVector.unsafeRunSync
+// A> 1
+// B> 1
+// interleaved> 1
+// interleaved> 1
+// A> 2
+// B> 2
+// interleaved> 2
+// interleaved> 2
+// ...
+
+//res20: Vector[Int] = Vector(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9)
+
+```
+----
+### Combining streams
+merge
+```scala
+
+(a merge b).through(log("merged")).compile.toVector.unsafeRunSync
+// B> 1
+// merged> 1
+// A> 1
+// merged> 1
+// A> 2
+// merged> 2
+// B> 2
+// merged> 2
+// B> 3
+// merged> 3
+// B> 4
+// merged> 4
+// A> 3
+// merged> 3
+// ...
+
+// res21: Vector[Int] = Vector(1, 1, 2, 2, 3, 4, 3, 5, 4, 5, 6, 6, 7, 7, 8, 8, 9, 9)
+```
+Notes:
+- notice the elements in the output are out of order.
+
+----
+### Combining streams
+either
+```scala
+(a either b).through(log("either")).compile.toVector.unsafeRunSync
+// B> 1
+// either> Right(1)
+// A> 1
+// either> Left(1)
+// B> 2
+// either> Right(2)
+// B> 3
+// either> Right(3)
+// A> 2
+// either> Left(2)
+// A> 3
+// either> Left(3)
+// B> 4
+// either> Right(4)
+// A> 4
+// either> Left(4)
+// A> 5
+// either> Left(5)
+// A> 6
+// either> Left(6)
+// B> 5
+// either> Right(5)
+// A> 7
+// either> Left(7)
+// B> 6
+// either> Right(6)
+// A> 8
+// either> Left(8)
+// B> 7
+// either> Right(7)
+// A> 9
+// either> Left(9)
+// B> 8
+// either> Right(8)
+// B> 9
+// either> Right(9)
+// res23: Vector[Either[Int, Int]] = Vector(
+//   Right(1),
+//   Left(1),
+//   Right(2),
+//   Right(3),
+//   Left(2),
+//   Left(3),
+//   Right(4),
+//   Left(4),
+//   Left(5),
+//   Left(6),
+//   Right(5),
+//   Left(7),
+//   Right(6),
+//   Left(8),
+//   Right(7),
+//   Left(9),
+//   Right(8),
+//   Right(9)
+// )
+
+
+```
+Notes:
+- Like merge, but tags each output with the branch it came from.
+---
+### Parallelism
+```scala
+  def parJoin[F2[_], O2](maxOpen: Int)(implicit ev: <:<[O, Stream[F2, O2]], ev2: <:<[F[_], F2[_]], F2: Concurrent[F2]): Stream[F2, O2] = ???
+  /* Nondeterministically merges a stream of streams (outer) in to a single stream,
+   * opening at most maxOpen streams at any point in time.
+   */
+
+val streams: Stream[IO, Stream[IO, Int]] = Stream(a, b, c)
+// streams: Stream[IO, Stream[IO, Int]] = Stream(..)
+
+
+@ streams.parJoin(3).through(log("joined")).compile.toVector.unsafeRunSync
+// C> 1
+// joined> 1
+// B> 1
+// joined> 1
+// B> 2
+// joined> 2
+// C> 2
+// joined> 2
+// B> 3
+// joined> 3
+// B> 4
+// joined> 4
+// A> 1
+// joined> 1
+// ...
+
+
+// res26: Vector[Int] = Vector(1, 1, 1, 2, 2, 3, 3, 4, 4, 2, 5, 5, 3, 6, 7, 6, 7, 4, 5, 8, 8, 9, 9, 6, 7, 8, 9)
+```
+---
+### Signal
+```scala
+// Pure holder of a single value of type A that can be read in the effect F.
+
+val x = SignallingRef[IO, Int](1)
+// x: IO[SignallingRef[IO, Int]] = Bind(
+
+// not prefered to do unsafe calls inside 
+x.flatMap { x1 => x1.get}.unsafeRunSync
+// res5: Int = 1
+
+// discrete produces infinite stream of all the changes to Signal
+Stream.eval(x).flatMap { x => x.discrete }.through(log("first signal")).compile.drain.unsafeToFuture
+// first signal> 1
+
+ x.flatMap {x => x.set(2)}.unsafeRunSync
+// this update does not produce any effect above as we want
+// because eval(x) creates a new signal
+
+
+//
+// starting unsafe debugging
+//
+val s = x.unsafeRunSync
+s.discrete.through(log("second signal")).compile.drain.unsafeToFuture
+// second signal> 1
+
+// The changes can be monitored now as we are not creating new signal
+
+s.set(2)
+// res9: IO[Unit] = Bind(
+res9.unsafeRunSync
+// second signal> 2
+
+s.modify(old => (old + 1, old))
+// res11: IO[Int] = Bind(...
+res11.unsafeRunSync
+// second signal> 3
+// res12: Int = 2
+
+s.continuous.take(100).compile.toVector.unsafeRunSync
+// res14: Vector[Int] = Vector(
+// 3,
+// 3,
+// ...
+
+s.set(6).unsafeRunSync
+// second signal> 6
+s.continuous.take(100).compile.toVector.unsafeRunSync
+// res18: Vector[Int] = Vector(
+//  6,
+//  6,
+//  6,
+// ...
+
+// normal non-unsafe use
+Stream.eval(SignallingRef[IO, Int](0)).flatMap { s =>
+     val monitor: Stream[IO, Nothing] = s.discrete.through(log("s updated")).drain
+     val data: Stream[IO, Int] = Stream.range(10, 20).through(randomDelays(1.second))
+     val writer: Stream[IO, Unit] = data.evalMap { d => s.set(d) }.drain
+     monitor merge writer}
+//res26: Stream[IO[x], Unit] = Stream(..)
+
+res26.compile.drain.unsafeRunSync
+// s updated> 0
+// s updated> 10
+// s updated> 11
+// s updated> 12
+// s updated> 13
+// s updated> 14
+// s updated> 15
+// s updated> 16
+// s updated> 17
+// s updated> 18
+// s updated> 19
+
+// and hangs
+
+Stream.eval(SignallingRef[IO, Int](0)).flatMap { s =>
+     val monitor: Stream[IO, Nothing] = s.discrete.through(log("s updated")).drain
+     val data: Stream[IO, Int] = Stream.range(10, 20).through(randomDelays(1.second))
+     val writer: Stream[IO, Unit] = data.evalMap { d => s.set(d) }.drain
+     monitor mergeHaltBoth writer}
+// res19: Stream[IO[x], Unit] = Stream(..)
+
+res19.compile.drain.unsafeRunSync
+// s updated> 0
+// s updated> 10
+// s updated> 11
+// s updated> 12
+// s updated> 13
+// s updated> 14
+// s updated> 15
+// s updated> 16
+// s updated> 17
+// s updated> 18
+// s updated> 19
+
+// and exits cleanly.
+
+```
+Notes:
+- note the unsafeToFuture not Run
+- notice monitor second signal is continuuosly logging.
+- that is the reason why merge hung
+
+---
+### Queue
+```scala
+ Stream.eval(Queue.bounded[IO, Int](5)).flatMap { q =>
+      val monitor: Stream[IO, Nothing] =  q.dequeue.through(log("dequeued")).drain
+      val data: Stream[IO, Int] = Stream.range(10, 20).through(randomDelays(1.second))
+      val writer: Stream[IO, Unit] = data.to(q.enqueue)
+     monitor mergeHaltBoth writer}
+//res21: Stream[IO[x], Unit] = Stream(..)
+
+res21.compile.drain.unsafeRunSync
+// dequeued> 10
+// dequeued> 11
+// dequeued> 12
+// dequeued> 13
+// dequeued> 14
+// dequeued> 15
+// dequeued> 16
+// dequeued> 17
+// dequeued> 18
+// dequeued> 19
+```
+---
+### The End
+
+- Thank you!
+
+---
+### Questions?
 
 - ??? 
 
