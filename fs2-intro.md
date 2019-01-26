@@ -1,5 +1,5 @@
 ﻿---
-title: Introduction to FS2
+title: Getting Started with FS2
 author: Padhu Ramalingam
 theme: beige
 highlightTheme: atom-one-light
@@ -449,7 +449,7 @@ src.compile.toVector.unsafeRunSync
 ```
 ----
 ### File IO
-string decoder
+Stream transformations
 ```scala
 text.utf8Decode
 // res8: Stream[Nothing, Byte] => Stream[Nothing, String] = fs2.text$$$Lambda$1929/18862762@a84ea8
@@ -468,6 +468,9 @@ res9.compile.toVector.unsafeRunSync
 // 17.9
 // 25""",
 ```
+Notes:
+- text.ut8Decode, text.lines are of type:  'Pipe[F{_], -I, +O]' 
+
 ----
 ### Control flow
 'through'

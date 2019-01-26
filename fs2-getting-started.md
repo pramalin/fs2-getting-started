@@ -1,21 +1,11 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-        <title>Getting Started with FS2</title>
-        <link rel="stylesheet" href="./css/reveal.css">
-        <link rel="stylesheet" href="./css/theme/beige.css" id="theme">
-        <link rel="stylesheet" href="./css/highlight/atom-one-light.css">
-        <link rel="stylesheet" href="./css/print/paper.css" type="text/css" media="print">
-
-
-    </head>
-    <body>
-
-        <div class="reveal">
-            <div class="slides"><section  data-markdown><script type="text/template">
+﻿---
+title: Getting Started with FS2
+author: Padhu Ramalingam
+theme: beige
+highlightTheme: atom-one-light
+revealOptions:
+  transition: slide
+---
 
 >Getting started with FS2 
 
@@ -28,13 +18,17 @@ _Functional Streams for Scala_
 - IO Streams
 - File IO Streams
 - Q&A
-</script></section><section  data-markdown><script type="text/template">
+
+---
+
 ### Motivation
 
 - Scala: from better Java to FP
 - Advent of Typelevel ecosystem
 - Libraries based on FS2
-</script></section><section  data-markdown><script type="text/template">
+
+---
+
 ### History
 
 https://fs2.io/
@@ -43,7 +37,9 @@ https://fs2.io/
  (previously scalaz-stream)
  - v0.8.5 Oct 23, 2016 
  - v0.1   Oct 10, 2013 
- - Final chapter from Functional programming in Scala Book. </script></section><section  data-markdown><script type="text/template">
+ - Final chapter from Functional programming in Scala Book. 
+---
+
 ### Bio
 ```
 தொட்டனைத் தூறும் மணற்கேணி மாந்தர்க்குக் 
@@ -57,18 +53,21 @@ and knowledge will flow in proportion to ones learning.
 Thirukkural #396.
 ```
 
-<aside class="notes"><ul>
-<li>Senior developer for Citi</li>
-<li>Facinated by FP.</li>
-<li>Completed Machine Learning, Deep Learning Specilization and other courses.</li>
-</ul>
-</aside></script></section><section ><section data-markdown><script type="text/template">
+Note:
+- Senior developer for Citi
+- Facinated by FP.
+- Completed Machine Learning, Deep Learning Specilization and other courses. 
+
+---
+
 ### Dependencies
   - <!-- .element: class="fragment" data-fragment-index="1"--> Cats Effect 
 > <!-- .element: class="fragment" data-fragment-index="1" -->The IO Monad for Scala
   - <!-- .element: class="fragment" data-fragment-index="2" --> Cats
 > <!-- .element: class="fragment" data-fragment-index="2" -->Lightweight, modular, and extensible library for functional programming
-</script></section><section data-markdown><script type="text/template">
+
+----
+
 ### REPL setup
 [ammonite](http://ammonite.io/#Ammonite-REPL)
 ```sh
@@ -82,13 +81,18 @@ If you like Ammonite, please support our development at www.patreon.com/lihaoyi
 
 @ "hello, world!"
 // res1: String = "hello, world!"
-```</script></section></section><section ><section data-markdown><script type="text/template">
+```
+---
+
 ### Pure
 
 **Referential transparency**:
 > Where one can replace an expression for its value, without changing the result
 
-<aside class="notes"></aside></script></section><section data-markdown><script type="text/template">
+Note:
+
+----
+
 ### Side Effects
 
 ```scala
@@ -104,7 +108,9 @@ val expr = println("Hey!")
 (expr, expr)
 // res3: (Unit, Unit) = ((), ())
 ```
-<!-- .element: class="fragment" --> **Not pure**</script></section><section data-markdown><script type="text/template">
+<!-- .element: class="fragment" --> **Not pure**
+----
+
 ### Side effects in concurrency
 
 ```scala
@@ -120,7 +126,9 @@ val result : Future[Int] = (read, read).mapN(_ + _)
 ```
 
 <!-- .element: class="fragment" --> **Not pure**
-</script></section></section><section ><section data-markdown><script type="text/template">
+
+---
+
 ## Cats Effect 
 
 **`IO[A]`** <!-- .element: class="fragment" -->
@@ -129,7 +137,9 @@ val result : Future[Int] = (read, read).mapN(_ + _)
 - <!-- .element: class="fragment" --> *Referentially transparent* (pure)
 - <!-- .element: class="fragment" --> Compositional
 - <!-- .element: class="fragment" --> Many algebras (monad,...)
-</script></section><section data-markdown><script type="text/template">
+
+----
+
 ### Managing effects
 using IO
 
@@ -148,11 +158,13 @@ n.unsafeRunSync
 // res4: Int = 10
 
 ``` 
-<aside class="notes"><ul>
-<li>The operations are suspended and run on demand only </li>
-</ul>
-<p><!-- .element: class="fragment" --> <strong>Pure</strong></p>
-</aside></script></section><section data-markdown><script type="text/template">
+Note:
+- The operations are suspended and run on demand only 
+
+<!-- .element: class="fragment" --> **Pure**
+
+----
+
 ### Managing effects
 
 ```scala
@@ -170,11 +182,12 @@ f(x, x)
 // hi!
 // hi!
 ```
-<aside class="notes"><ul>
-<li>side effects issue is resolved.</li>
-<li>IO encapsulates the description of effects and maintain RT</li>
-</ul>
-</aside></script></section></section><section ><section data-markdown><script type="text/template">### IO Monad 
+Note:
+- side effects issue is resolved.
+- IO encapsulates the description of effects and maintain RT
+
+---
+### IO Monad 
 
 ```scala
 
@@ -195,13 +208,14 @@ res4.unsafeRunSync
 
 
 ```
-<aside class="notes"><ul>
-<li>pure and flatmap are the primitive combinators.</li>
-<li>map is a derived combinator.</li>
-<li>IO Monad have other methods to support concurrency, cancel, etc.</li>
-<li>we&#39;ll see concurrency next.</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### for comprehension
+Note:
+- pure and flatmap are the primitive combinators.
+- map is a derived combinator.
+- IO Monad have other methods to support concurrency, cancel, etc.
+- we'll see concurrency next.
+
+----
+### for comprehension
 sidebar
 ```scala
 List(1, 2, 3).flatMap(n => List("a", "b").map(c => (n, c)))
@@ -213,10 +227,11 @@ for {
  } yield (n, c)
 // res11: List[(Int, String)] = List((1, "a"), (1, "b"), (2, "a"), (2, "b"), (3, "a"), (3, "b"))
 ```
-<aside class="notes"><ul>
-<li>for comprehension is syntactic sugar to manage flatMap and maps</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### IO Application
+Note:
+  - for comprehension is syntactic sugar to manage flatMap and maps
+
+----
+### IO Application
 Pure hello world
 ```scala
 
@@ -230,7 +245,9 @@ Pure hello world
   } yield ()
 
   hello.unsafeRunSync()
-```</script></section><section data-markdown><script type="text/template">### IO Monad - concurrency 
+```
+----
+### IO Monad - concurrency 
 main thread
 
 ```scala
@@ -251,11 +268,11 @@ t.unsafeRunSync
 
 ```
 
-<aside class="notes"><ul>
-<li>ContextShift implicit is essntial for concurrency</li>
-<li>Displaying the thread name to validate</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### IO Monad - concurrency 
+Note: 
+- ContextShift implicit is essntial for concurrency
+- Displaying the thread name to validate
+----
+### IO Monad - concurrency 
 forked thread
 
 ```scala
@@ -272,11 +289,11 @@ fiber.join.unsafeRunSync
 
 ```
 
-<aside class="notes"><ul>
-<li>ContextShift implicit is essntial for concurrency</li>
-<li>Displaying the thread name to validate</li>
-</ul>
-</aside></script></section></section><section  data-markdown><script type="text/template">
+Note: 
+- ContextShift implicit is essntial for concurrency
+- Displaying the thread name to validate
+---
+
 ### Stream
 (scala.collection)
 ```scala
@@ -289,10 +306,11 @@ Stream(1, 2, 3).map(_ + 1)
 Stream(1, 2, 3).map(_ + 1).map(_.toString)
 // res3: Stream[String] = Stream("2", "3", "4")
 ```
-<aside class="notes"><ul>
-<li>Refresher collection Stream before IO Streams</li>
-</ul>
-</aside></script></section><section ><section data-markdown><script type="text/template">
+Note:
+- Refresher collection Stream before IO Streams
+
+---
+
 ## fs2 Streams
 
 **`Stream[F[_], A]`** <!-- .element: class="fragment" -->
@@ -301,10 +319,11 @@ Stream(1, 2, 3).map(_ + 1).map(_.toString)
 -  <!-- .element: class="fragment" --> While requesting effects in `F`
 -  <!-- .element: class="fragment" --> `F` is normally `IO`
 
-<aside class="notes"><ul>
-<li>also pure, compositional, possesses algebras</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### FS2 Stream
+Note:
+- also pure, compositional, possesses algebras
+
+----
+### FS2 Stream
 -without effects
 ```scala
 import fs2._
@@ -320,7 +339,9 @@ Stream(1, 2, 3).map(_ + 1).map(_.toString)
 
 Stream(1, 2, 3).flatMap { n => Stream.emit(List.fill(n)(n))}
 // res5: Stream[Nothing, List[Int]] = Stream(..)
-```</script></section><section data-markdown><script type="text/template">### Pure Stream
+```
+----
+### Pure Stream
 combinators - interleave and interperse.
 ```scala
 val s = Stream(1, 2, 3)
@@ -339,7 +360,9 @@ val t = s.intersperse(-42)
 t.toList
 // res12: List[Int] = List(0, -42, 1, -42, 2, -42, 3, -42, 4, -42, 5, -42, 6, -42, 7, -42, 8, -42, 9)
 ```
-</script></section><section data-markdown><script type="text/template">### Pure Stream
+
+----
+### Pure Stream
 combinators - zip.
 ```scala
 val s = Stream.range(0, 10)
@@ -348,7 +371,9 @@ val t = Stream(1, 2, 3)
 // t: Stream[Nothing, Int] = Stream(..)
 s.zip(t3).toList
 // res15: List[(Int, Int)] = List((0, 1), (1, 2), (2, 3))
-```</script></section></section><section ><section data-markdown><script type="text/template">### IO Stream
+```
+---
+### IO Stream
 ```scala
 interp.load.ivy("co.fs2" %% "fs2-core" % "1.0.2")
 interp.load.ivy("co.fs2" %% "fs2-io" % "1.0.2")
@@ -366,10 +391,10 @@ Stream.eval(currentTime)
 // res7: Stream[IO, Long] = Stream(..)
 
 ```
-<aside class="notes"><ul>
-<li>notice the type of the stream created.</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### IO Stream
+Note:
+- notice the type of the stream created.
+----
+### IO Stream
 Infinite IO Stream
 ```scala
 Stream.eval(currentTime).repeat.take(5).compile.toVector
@@ -380,10 +405,11 @@ res8.unsafeRunSync
 Stream.repeatEval(currentTime).take(5).compile.toVector
 // res10: IO[Vector[Long]] = Map(...
 ```
-<aside class="notes"><ul>
-<li>repeatEval is short</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### IO Stream
+Note:
+- repeatEval is short
+
+----
+### IO Stream
 Combining with no effects Streams
 ```scala
 val s = Stream.range(0,8)
@@ -402,11 +428,12 @@ res12: Vector[(Int, Long)] = Vector(
   (7, 1548293081491L)
 )
 ```
-<aside class="notes"><ul>
-<li>Same as pure and collections.</li>
-<li>terminates when one of the stream in combination ends.</li>
-</ul>
-</aside></script></section></section><section ><section data-markdown><script type="text/template">### File IO
+Note:
+- Same as pure and collections.
+- terminates when one of the stream in combination ends.
+
+---
+### File IO
 Imports
 ```scala
 interp.load.ivy("co.fs2" %% "fs2-core" % "1.0.2")
@@ -422,7 +449,9 @@ implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionCo
 implicit val timer: Timer[IO] = IO.timer(scala.concurrent.ExecutionContext.Implicits.global)
 
 val blockingExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
-```</script></section><section data-markdown><script type="text/template">### File IO
+```
+----
+### File IO
 Raw bytes
 
 ```scala
@@ -436,7 +465,9 @@ src.compile.toVector.unsafeRunSync
 //  32,
 //  116,
 ...
-```</script></section><section data-markdown><script type="text/template">### File IO
+```
+----
+### File IO
 Stream transformations
 ```scala
 text.utf8Decode
@@ -456,10 +487,11 @@ res9.compile.toVector.unsafeRunSync
 // 17.9
 // 25""",
 ```
-<aside class="notes"><ul>
-<li>text.ut8Decode, text.lines are of type:  &#39;Pipe[F{_], -I, +O]&#39;</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### Control flow
+Note:
+- text.ut8Decode, text.lines are of type:  'Pipe[F{_], -I, +O]' 
+
+----
+### Control flow
 'through'
 ```scala
 def fahrenheitToCelsius(f: Double): Double = (f - 32.0) * (5.0/9.0)
@@ -473,10 +505,11 @@ res12.compile.toVector.unsafeRunSync
 //  sun.misc.FloatingDecimal.readJavaFormatString(Unknown Source)
 //  sun.misc.FloatingDecimal.parseDouble(Unknown Source)
 ```
-<aside class="notes"><ul>
-<li>note the execption</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### Control flow
+Note:
+- note the execption
+
+----
+### Control flow
 filters
 ```scala
 val decoded: Stream[IO, String] = src.through(text.utf8Decode)
@@ -490,7 +523,9 @@ val task: IO[Unit] = written.compile.drain
 
 task.unsafeRunSync()
 blockingExecutionContext.shutdown()
-```</script></section><section data-markdown><script type="text/template">### Stream type aliases
+```
+----
+### Stream type aliases
 
 ```scala    
 type Pipe[F[_], -I, +O] = Stream[F, I] => Stream[F, O]
@@ -498,14 +533,15 @@ type Pipe2[F[_], -I, -I2, +O] =
 	 (Stream[F, I], Stream[F, I2]) => Stream[F, O]
 type Sink[F[_], -I] = Pipe[F, I, Unit]
 ```
-<aside class="notes"><p>Do pipes compose as well as functions?
--- Ultimate way to evaluate a library is by how well it composes.</p>
-<ul>
-<li>&#39;through&#39; Pipe is a type alias.</li>
-<li>&#39;zip&#39;  Pipe2 is a function2</li>
-<li>&#39;to&#39; Sink is Pipe with output set to Unit.</li>
-</ul>
-</aside></script></section></section><section ><section data-markdown><script type="text/template">### Undeterministic streams
+Note:
+Do pipes compose as well as functions?
+-- Ultimate way to evaluate a library is by how well it composes.
+- 'through' Pipe is a type alias.
+- 'zip'  Pipe2 is a function2
+- 'to' Sink is Pipe with output set to Unit.
+
+---
+### Undeterministic streams
 Setup
 ```scala
 interp.load.ivy("co.fs2" %% "fs2-core" % "1.0.2")
@@ -532,7 +568,9 @@ ticks.take(10).compile.drain.unsafeRunSync
 // Time: 3125578098 nanoseconds
 ...
 
-```</script></section><section data-markdown><script type="text/template">### Undeterministic streams
+```
+----
+### Undeterministic streams
 Add log
 ```scala
 (Stream(1, 2, 3) ++ Stream(4, 5, 6))
@@ -553,11 +591,12 @@ res12.compile.drain.unsafeRunSync
 // A> 3
 
 ```
-<aside class="notes"><ul>
-<li>how to monitor individual streams?</li>
-<li>add log.</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### Undeterministic streams
+Note:
+- how to monitor individual streams?
+- add log.
+
+----
+### Undeterministic streams
 add random delay for demo
 ```scala
 def randomDelays[A](max: FiniteDuration): Pipe[IO,A,A] = _.evalMap { a =>
@@ -588,7 +627,9 @@ Stream.range(1, 20).through(log("before-delay"))
 
 // res18: Vector[Int] = Vector(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19)
 
-```</script></section></section><section ><section data-markdown><script type="text/template">### Combining streams
+```
+---
+### Combining streams
 interleved
 ```scala
 
@@ -610,7 +651,9 @@ val c = Stream.range(1, 10).through(randomDelays(1.second)).through(log("C"))
 
 //res20: Vector[Int] = Vector(1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9)
 
-```</script></section><section data-markdown><script type="text/template">### Combining streams
+```
+----
+### Combining streams
 merge
 ```scala
 
@@ -633,10 +676,11 @@ merge
 
 // res21: Vector[Int] = Vector(1, 1, 2, 2, 3, 4, 3, 5, 4, 5, 6, 6, 7, 7, 8, 8, 9, 9)
 ```
-<aside class="notes"><ul>
-<li>notice the elements in the output are out of order.</li>
-</ul>
-</aside></script></section><section data-markdown><script type="text/template">### Combining streams
+Note:
+- notice the elements in the output are out of order.
+
+----
+### Combining streams
 either
 ```scala
 (a either b).through(log("either")).compile.toVector.unsafeRunSync
@@ -699,10 +743,10 @@ either
 
 
 ```
-<aside class="notes"><ul>
-<li>Like merge, but tags each output with the branch it came from.</li>
-</ul>
-</aside></script></section></section><section  data-markdown><script type="text/template">### Parallelism
+Note:
+- Like merge, but tags each output with the branch it came from.
+---
+### Parallelism
 ```scala
   def parJoin[F2[_], O2](maxOpen: Int)(implicit ev: <:<[O, Stream[F2, O2]], ev2: <:<[F[_], F2[_]], F2: Concurrent[F2]): Stream[F2, O2] = ???
   /* Nondeterministically merges a stream of streams (outer) in to a single stream,
@@ -732,7 +776,9 @@ val streams: Stream[IO, Stream[IO, Int]] = Stream(a, b, c)
 
 
 // res26: Vector[Int] = Vector(1, 1, 1, 2, 2, 3, 3, 4, 4, 2, 5, 5, 3, 6, 7, 6, 7, 4, 5, 8, 8, 9, 9, 6, 7, 8, 9)
-```</script></section><section  data-markdown><script type="text/template">### Signal
+```
+---
+### Signal
 ```scala
 // Pure holder of a single value of type A that can be read in the effect F.
 
@@ -833,12 +879,13 @@ res19.compile.drain.unsafeRunSync
 // and exits cleanly.
 
 ```
-<aside class="notes"><ul>
-<li>note the unsafeToFuture not Run</li>
-<li>notice monitor second signal is continuuosly logging.</li>
-<li>that is the reason why merge hung</li>
-</ul>
-</aside></script></section><section  data-markdown><script type="text/template">### Queue
+Note:
+- note the unsafeToFuture not Run
+- notice monitor second signal is continuuosly logging.
+- that is the reason why merge hung
+
+---
+### Queue
 ```scala
  Stream.eval(Queue.bounded[IO, Int](5)).flatMap { q =>
       val monitor: Stream[IO, Nothing] =  q.dequeue.through(log("dequeued")).drain
@@ -858,71 +905,23 @@ res21.compile.drain.unsafeRunSync
 // dequeued> 17
 // dequeued> 18
 // dequeued> 19
-```</script></section><section  data-markdown><script type="text/template">#### References
+```
+---
+#### References
 
 - Functional Programming in Scala - By Paul Chiusano and Runar Bjarnason
 - [Scala with Cats Book](underscore.io)
 - [FS2 Additional Resources](https://github.com/functional-streams-for-scala/fs2/wiki/Additional-Resources)
 - [An IO monad for cats](https://typelevel.org/blog/2017/05/02/io-monad-for-cats.html)
 - [The Making of an IO - Daniel Spiewak](https://www.youtube.com/watch?v=g_jP47HFpWA)
-</script></section><section  data-markdown><script type="text/template">### The End
+
+---
+### The End
 
 - Thank you!
-</script></section><section  data-markdown><script type="text/template">### Questions?
+
+---
+### Questions?
 
 - ??? 
 
-</script></section></div>
-        </div>
-
-        <script src="./lib/js/head.min.js"></script>
-        <script src="./js/reveal.js"></script>
-
-        <script>
-            function extend() {
-              var target = {};
-              for (var i = 0; i < arguments.length; i++) {
-                var source = arguments[i];
-                for (var key in source) {
-                  if (source.hasOwnProperty(key)) {
-                    target[key] = source[key];
-                  }
-                }
-              }
-              return target;
-            }
-
-            // Optional libraries used to extend on reveal.js
-            var deps = [
-              { src: './lib/js/classList.js', condition: function() { return !document.body.classList; } },
-              { src: './plugin/markdown/marked.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
-              { src: './plugin/markdown/markdown.js', condition: function() { return !!document.querySelector('[data-markdown]'); } },
-              { src: './plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-              { src: './plugin/zoom-js/zoom.js', async: true },
-              { src: './plugin/notes/notes.js', async: true },
-              { src: './plugin/math/math.js', async: true }
-            ];
-
-            // default options to init reveal.js
-            var defaultOptions = {
-              controls: true,
-              progress: true,
-              history: true,
-              center: true,
-              transition: 'default', // none/fade/slide/convex/concave/zoom
-              dependencies: deps
-            };
-
-            // options from URL query string
-            var queryOptions = Reveal.getQueryHash() || {};
-
-            var options = {"transition":"slide"};
-            options = extend(defaultOptions, options, queryOptions);
-        </script>
-
-
-        <script>
-          Reveal.initialize(options);
-        </script>
-    </body>
-</html>
