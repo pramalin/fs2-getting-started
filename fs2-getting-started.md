@@ -47,8 +47,8 @@ https://fs2.io/
 ```
 ___
 ```txt
-Water will flow from a well in proportion to the depth it is dug,
-and knowledge will flow in proportion to ones learning.
+Like well flows high as it's dug,
+humans gain knowledge as they learn more.
 
 Thirukkural #396.
 ```
@@ -57,7 +57,8 @@ Note:
 - Senior developer for Citi
 - Facinated by FP.
 - Completed Machine Learning, Deep Learning Specilization and other courses. 
-
+- https://archive.org/details/tiruvalluvanayan00tiruuoft
+- Remember - Ellis, Francis Whyte. John Pennycuick.
 ---
 
 ### Dependencies
@@ -82,8 +83,19 @@ If you like Ammonite, please support our development at www.patreon.com/lihaoyi
 @ "hello, world!"
 // res1: String = "hello, world!"
 ```
----
+----
+#### Mask verbose print
+```scala
+def disablePrettyPrintIO = repl.pprinter.update(repl.pprinter().copy(additionalHandlers = {
+  case io: cats.effect.IO[_] => pprint.Tree.Literal("✨✨✨")
+}))
+disablePrettyPrintIO
+def enablePrettyPrintIO = repl.pprinter.update(repl.pprinter().copy(additionalHandlers = PartialFunction.empty))
+```
+Note:
+- disable printing verbose internals
 
+---
 ### Pure
 
 **Referential transparency**:
@@ -410,7 +422,7 @@ Note:
 
 ----
 ### IO Stream
-Combining with no effects Streams
+Combining with pure Streams
 ```scala
 val s = Stream.range(0,8)
 // s: Stream[Nothing, Int] = Stream(..)
@@ -906,6 +918,228 @@ res21.compile.drain.unsafeRunSync
 // dequeued> 18
 // dequeued> 19
 ```
+
+---
+### Demo
+__Word analogy__
+
+a is to b as c is to _?
+
+Note:
+- Assignment from Deep Learning specialization course.
+----
+#### Demo
+__GloVe__
+
+```txt    
+Global Vector for Word Representation  
+Reference (https://nlp.stanford.edu/projects/glove/)  
+sample file: glove.6B.50d.txt  
+dimension: [400000][50]  
+type: [String][Double[]]
+```
+----
+#### Demo
+__Cosine similarity__
+
+
+- similarity = A . B / ||A|| * ||B||  
+Where,
+- A = a<sub>0</sub>, a<sub>1</sub>, ... a<sub>n</sub>
+- B = b<sub>0</sub>, b<sub>1</sub>, ... b<sub>n</sub>
+- A . B = a<sub>0</sub> \* b<sub>0</sub> + a<sub>1</sub> \* b<sub>1</sub> + ... + a<sub>n</sub> * b<sub>n</sub>  
+- ||A|| = Norm(A) =  a<sub>0</sub> \* a<sub>0</sub> + a<sub>1</sub> \* a<sub>1</sub> + ... + a<sub>n</sub> * a<sub>n</sub>  
+  
+Note:
+- applications in recommendation engines
+
+----
+#### Demo
+__find word similarity__
+
+Given word vectors e<sub>a</sub>, e<sub>b</sub>, e<sub>c</sub>, e<sub>d</sub> find d with relation:  
+e<sub>a</sub> - e<sub>b</sub> ≈ e<sub>c</sub> - e<sub>d</sub> using cosine similarity
+
+----
+#### Demo
+__source__  
+```scala
+// https://github.com/pramalin/fs2-word-similarity/read_glove.sc
+/* jar imports */
+import $ivy.`co.fs2::fs2-core:1.0.2`
+import $ivy.`co.fs2::fs2-io:1.0.2`
+
+// disable REPL printing verbose IO values 
+import cats.effect._
+
+def disablePrettyPrintIO = repl.pprinter.update(repl.pprinter().copy(additionalHandlers = {
+  case io: cats.effect.IO[_] => pprint.Tree.Literal("✨✨✨")
+}))
+
+disablePrettyPrintIO
+
+def enablePrettyPrintIO = repl.pprinter.update(repl.pprinter().copy(additionalHandlers = PartialFunction.empty))
+
+/* script starts here */
+import cats.effect._
+import fs2._
+import java.nio.file.Paths
+import java.util.concurrent.Executors
+import scala.concurrent.ExecutionContext
+
+implicit val cs: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
+implicit val timer: Timer[IO] = IO.timer(scala.concurrent.ExecutionContext.Implicits.global)
+
+val blockingEc = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
+val src = io.file.readAll[IO](java.nio.file.Paths.get("glove.6B.50d.txt"), blockingEc, 1024)
+
+val lines = src.through(text.utf8Decode).through(text.lines)
+val wordIndex = lines.map(_.split(" ").head).zipWithIndex
+def index(word: String): Stream[IO, Long] = wordIndex.find(_._1.equals(word)).map(_._2)
+// get attributes for word
+def attribs(word:String) = index(word).flatMap(lines.drop(_).take(1)).map(_.split(" ").toVector).map(_.tail).map(_.map(_.toDouble)) 
+
+// test index
+index("queen").flatMap(lines.drop(_)).take(1)
+
+// vector calc
+def diffV(av: Vector[Double], bv: Vector[Double]): Vector[Double] =
+  for ((a, b) <- av zip bv) yield (a - b)
+def dot(av: Vector[Double], bv: Vector[Double]): Double =
+  (for ((a, b) <- av zip bv) yield a * b) sum
+def norm(av: Vector[Double]): Double =
+  Math.sqrt((for (a <- av) yield a * a) sum)
+def cosine_similarity(a: Vector[Double], b: Vector[Double]): Double =
+   dot(a, b) / (norm(a) * norm(b))
+
+
+
+// get distance between words
+def dist(u: String, v: String) = (attribs(u) zip attribs(v)).map(p => cosine_similarity(p._1.toVector, p._2.toVector)) 
+
+//dist("him", "her").compile.toVector.unsafeRunSync 
+//dist("king", "queen").compile.toVector.unsafeRunSync 
+//dist("man", "woman").compile.toVector.unsafeRunSync 
+// ("italy", "italian", "spain"), ("india", "delhi", "japan"), ("man", "woman", "boy"), ("small", "smaller", "large")
+val a = "italy"
+val b = "italian"
+val c = "spain"
+val factor = 0.4
+
+// word distance
+def diff_word(u: String, v: String) = (attribs(u) zip attribs(v)).map(p => diffV(p._1.toVector, p._2.toVector)) 
+
+val c_sim = for {
+  w <- wordIndex
+  a_b <- diff_word(a, b)
+  c_x <- diff_word(c, w._1)
+  sim <- Stream(cosine_similarity(a_b, c_x))
+  _ <- if (sim > factor) Stream.eval(IO(println(s"$w, $sim"))) else Stream()
+} yield (w._1, sim)
+
+/*
+// results
+@ c_sim.take(10).compile.toVector.unsafeRunSync
+(a,7), 0.40563150208976145
+(an,29), 0.4252293693397883
+(american,140), 0.42150345258791344
+(known,225), 0.4203211204887907
+(british,297), 0.42361789696212426
+(french,348), 0.6347354522189068
+(russian,467), 0.46762615979965744
+(whose,507), 0.4229735137631385
+(german,514), 0.46345247634759656
+(named,564), 0.42304541430647663
+@ val factor = 0.8
+@ c_sim.take(1).compile.toVector.unsafeRunSync
+(spanish,1141), 0.8875303721276963
+res4: Vector[(String, Double)] = Vector(("spanish", 0.8875303721276963))
+*/
+
+```
+----
+#### Demo
+__ script__  
+
+```txt
+To run, download [glove.6B.50d.txt]
+(https://www.kaggle.com/watts2/glove6b50dtxt)
+
+From Ammonite REPL.
+```
+```scala
+@ import $file.read_glove, read_glove._
+
+@ a
+res1: String = "italy"
+@ b
+res2: String = "italian"
+@ c
+res3: String = "spain"
+@ c_sim
+res4: fs2.Stream[cats.effect.IO[x], (String, Double)] = Stream(..)
+@ factor
+res5: Double = 0.4
+@ c_sim.take(10).compile.toVector.unsafeRunSync
+```
+----
+#### Demo
+__results__
+
+```scala
+@ c_sim.take(10).compile.toVector.unsafeRunSync
+res1: Vector[(String, Double)] = Vector(
+  ("french", 0.6347354522189068),
+  ("english", 0.5219710309872815),
+  ("italian", 0.7283498794430515),
+  ("spanish", 0.8875303721276963),
+  ("professional", 0.5020698039090873),
+  ("dutch", 0.5002985942558867),
+  ("mexican", 0.5790748083609243),
+  ("brazilian", 0.5498009970871708),
+  ("journalist", 0.528053034651764),
+  ("portuguese", 0.644859697871396)
+
+@ val factor = 0.8
+@ c_sim.take(1).compile.toVector.unsafeRunSync
+(spanish,1141), 0.8875303721276963
+res4: Vector[(String, Double)] = Vector(("spanish", 0.8875303721276963))
+```
+
+----
+#### Demo
+__other examples__  
+
+```txt
+Try with different words and factors. This can be extremely slow.
+
+Word pair suggestions
+
+  ("italy", "italian", "spain"),
+  ("india", "delhi", "japan"),
+  ("man", "woman", "boy"),
+  ("small", "smaller", "large")
+```
+
+----
+#### Demo
+__Streaming web App__
+
+```txt
+    To run Streaming Web App version of the script
+    copy the glove file to sec/main/resources.
+```
+    sbt> compile
+    sbt> run
+    
+    From a browser
+    http://localhost:8080/similarity?word1=italy&word2=italian&word3=spain&factor=0.4    
+
+
+    Try different words and factors.
+
+Note: The browsers timeout unlike the REPL session, so try with lower factors first.
+
 ---
 #### References
 
@@ -923,5 +1157,5 @@ res21.compile.drain.unsafeRunSync
 ---
 ### Questions?
 
-- ??? 
+ 
 
