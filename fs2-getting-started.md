@@ -789,7 +789,7 @@ val streams: Stream[IO, Stream[IO, Int]] = Stream(a, b, c)
 
 // res26: Vector[Int] = Vector(1, 1, 1, 2, 2, 3, 3, 4, 4, 2, 5, 5, 3, 6, 7, 6, 7, 4, 5, 8, 8, 9, 9, 6, 7, 8, 9)
 ```
----
+----
 ### Signal
 ```scala
 // Pure holder of a single value of type A that can be read in the effect F.
@@ -896,7 +896,7 @@ Note:
 - notice monitor second signal is continuuosly logging.
 - that is the reason why merge hung
 
----
+----
 ### Queue
 ```scala
  Stream.eval(Queue.bounded[IO, Int](5)).flatMap { q =>
@@ -1133,7 +1133,7 @@ __Streaming web App__
     sbt> run
     
     From a browser
-    http://localhost:8080/similarity?word1=italy&word2=italian&word3=spain&factor=0.4    
+    http://localhost:5000/similarity?word1=italy&word2=italian&word3=spain&factor=0.4    
 
 
     Try different words and factors.
