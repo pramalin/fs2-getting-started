@@ -19,26 +19,7 @@ _Functional Streams for Scala_
 - File IO Streams
 - Q&A
 
----
-
-### Motivation
-
-- Scala: from better Java to FP
-- Advent of Typelevel ecosystem
-- Libraries based on FS2
-
----
-
-### History
-
-https://fs2.io/
- - v1.0.0  Oct  5, 2018
-
- (previously scalaz-stream)
- - v0.8.5 Oct 23, 2016 
- - v0.1   Oct 10, 2013 
- - Final chapter from Functional programming in Scala Book. 
----
+----
 
 ### Bio
 ```
@@ -59,6 +40,25 @@ Note:
 - Completed Machine Learning, Deep Learning Specilization and other courses. 
 - https://archive.org/details/tiruvalluvanayan00tiruuoft
 - Remember - Ellis, Francis Whyte. John Pennycuick.
+----
+
+### Motivation
+
+- Scala: from better Java to FP
+- Advent of Typelevel ecosystem
+- Libraries based on FS2
+
+----
+
+### History
+
+https://fs2.io/
+ - v1.0.0  Oct  5, 2018
+
+ (previously scalaz-stream)
+ - v0.8.5 Oct 23, 2016 
+ - v0.1   Oct 10, 2013 
+ - Final chapter from Functional programming in Scala Book. 
 ---
 
 ### Dependencies
