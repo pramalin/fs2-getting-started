@@ -714,7 +714,7 @@ either
 <aside class="notes"><ul>
 <li>Like merge, but tags each output with the branch it came from.</li>
 </ul>
-</aside></script></section></section><section  data-markdown><script type="text/template">### Parallelism
+</aside></script></section></section><section ><section data-markdown><script type="text/template">### Parallelism
 ```scala
   def parJoin[F2[_], O2](maxOpen: Int)(implicit ev: <:<[O, Stream[F2, O2]], ev2: <:<[F[_], F2[_]], F2: Concurrent[F2]): Stream[F2, O2] = ???
   /* Nondeterministically merges a stream of streams (outer) in to a single stream,
@@ -744,7 +744,7 @@ val streams: Stream[IO, Stream[IO, Int]] = Stream(a, b, c)
 
 
 // res26: Vector[Int] = Vector(1, 1, 1, 2, 2, 3, 3, 4, 4, 2, 5, 5, 3, 6, 7, 6, 7, 4, 5, 8, 8, 9, 9, 6, 7, 8, 9)
-```</script></section><section  data-markdown><script type="text/template">### Signal
+```</script></section><section data-markdown><script type="text/template">### Signal
 ```scala
 // Pure holder of a single value of type A that can be read in the effect F.
 
@@ -850,7 +850,7 @@ res19.compile.drain.unsafeRunSync
 <li>notice monitor second signal is continuuosly logging.</li>
 <li>that is the reason why merge hung</li>
 </ul>
-</aside></script></section><section  data-markdown><script type="text/template">### Queue
+</aside></script></section><section data-markdown><script type="text/template">### Queue
 ```scala
  Stream.eval(Queue.bounded[IO, Int](5)).flatMap { q =>
       val monitor: Stream[IO, Nothing] =  q.dequeue.through(log("dequeued")).drain
@@ -871,7 +871,7 @@ res21.compile.drain.unsafeRunSync
 // dequeued> 18
 // dequeued> 19
 ```
-</script></section><section ><section data-markdown><script type="text/template">### Demo
+</script></section></section><section ><section data-markdown><script type="text/template">### Demo
 __Word analogy__
 
 a is to b as c is to _?
@@ -1071,7 +1071,7 @@ __Streaming web App__
     sbt> run
     
     From a browser
-    http://localhost:8080/similarity?word1=italy&word2=italian&word3=spain&factor=0.4    
+    http://localhost:5000/similarity?word1=italy&word2=italian&word3=spain&factor=0.4    
 
 
     Try different words and factors.
